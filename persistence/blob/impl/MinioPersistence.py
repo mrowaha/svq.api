@@ -18,22 +18,36 @@ class MinioPersistence:
         if not self.client.bucket_exists(name):
             self.client.make_bucket(name)
 
+    def uploadFile(self: "MinioPersistence", name: str, *, bucket: str, data, size, type) -> None:
+        """
+        upload file, with the given name to the selected bucket
+        """
+        if self.client.bucket_exists(bucket):
+            self.client.put_object(
+                bucket_name=bucket,
+                object_name=name,
+                data=data,
+                length=size,
+                content_type=type
+            )
+
 
 minioClient: Union[None, MinioPersistence] = None
 
 
 def getMinioClient() -> MinioPersistence:
     global minioClient
-    if minioClient is None:
-        endpoint = "localhost:9000" if os.getenv(
-            "MINIO_ENDPOINT") is None else os.getenv("MINIO_ENDPOINT")
-        accessKey = "admin" if os.getenv(
-            "MINIO_ACCESS_KEY") is None else os.getenv("MINIO_ACCESS_KEY")
-        secretKey = "password" if os.getenv(
-            "MINIO_SECRET_KEY") is None else os.getenv("MINIO_SECRET_KEY")
-        minioClient = MinioPersistence(
-            endpoint=endpoint,
-            accesskey=accessKey,
-            secretkey=secretKey
-        )
+    if os.getenv("ENV") == "development":
+        if minioClient is None:
+            endpoint = "localhost:9000" if os.getenv(
+                "MINIO_ENDPOINT") is None else os.getenv("MINIO_ENDPOINT")
+            accessKey = "admin" if os.getenv(
+                "MINIO_ACCESS_KEY") is None else os.getenv("MINIO_ACCESS_KEY")
+            secretKey = "password" if os.getenv(
+                "MINIO_SECRET_KEY") is None else os.getenv("MINIO_SECRET_KEY")
+            minioClient = MinioPersistence(
+                endpoint=endpoint,
+                accesskey=accessKey,
+                secretkey=secretKey
+            )
     return minioClient

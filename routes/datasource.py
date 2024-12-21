@@ -2,6 +2,7 @@
 contains mappings for datasources api
 :author Muhammad Rowaha<ashfaqrowaha@gmail.com>
 """
+import io
 from fastapi import APIRouter, UploadFile, File, Form, FastAPI, Depends
 from persistence.injectors import getBlobStorage, IBlobPersistence
 router = APIRouter(prefix="/datasource")
@@ -10,16 +11,22 @@ router = APIRouter(prefix="/datasource")
 @router.post("/upload")
 async def uploadFile(
     datasource: str = Form(...),
-    content: UploadFile = File(...),
+    file: UploadFile = File(...),
     blobPersistence: IBlobPersistence = Depends(getBlobStorage)
 ):
-
-    print(f"uploading datasource for file {datasource}")
-    blob = await content.read()
-
-    print(f"file content {blob}")
-
     blobPersistence.createBucket("hello")
+
+    # extract file information
+    fileContent = await file.read()
+    fileSize = len(fileContent)
+    blobPersistence.uploadFile(
+        file.filename,
+        bucket="hello",
+        size=fileSize,
+        data=io.BytesIO(fileContent),
+        type=file.content_type
+    )
+
     return {
         "ok": True
     }
