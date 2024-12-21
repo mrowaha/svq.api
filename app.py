@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from routes import register_echo
+from routes import registerDataSourceHandlers
 app = FastAPI(
     docs_url="/docs",
     description="SVQ backend api",
 )
-register_echo(app, prefix="/v1")
+registerDataSourceHandlers(app, prefix="/v1")
