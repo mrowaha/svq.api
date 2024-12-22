@@ -14,5 +14,36 @@ services:
       - minio_data:/data
     command: server /data --console-address ":9001"
 
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: svq
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=password
+    command: >
+      start-dev --hostname localhost
+      --db=postgres
+      --db-url=jdbc:postgresql://postgres:5432/svq
+      --db-username=admin
+      --db-password=password
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+    entrypoint: ["/opt/keycloak/bin/kc.sh"]
+
 volumes:
   minio_data:
+  postgres_data:

@@ -1,12 +1,11 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from routes import registerDataSourceHandlers, register_echo
-
+from routes import registerDataSourceHandlers, registerEcho, registerAuth
 load_dotenv()
-
 app = FastAPI(
     docs_url="/docs",
     description="SVQ backend api",
 )
+registerAuth(app, prefix="/v1")
 registerDataSourceHandlers(app, prefix="/v1")
-register_echo(app, prefix="/v1")
+registerEcho(app, prefix="/v1")
