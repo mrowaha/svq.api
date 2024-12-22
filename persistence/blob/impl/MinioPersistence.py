@@ -1,10 +1,9 @@
 """
 MinioPersistence implements IBlobPersistence
 """
-import os
+from typing import Union, Dict
 from minio import Minio
-from typing import Union
-
+import os
 
 class MinioPersistence:
     def __init__(self, *, endpoint: str, accesskey: str, secretkey: str):
@@ -18,7 +17,7 @@ class MinioPersistence:
         if not self.client.bucket_exists(name):
             self.client.make_bucket(name)
 
-    def uploadFile(self: "MinioPersistence", name: str, *, bucket: str, data, size, type) -> None:
+    def uploadFile(self: "MinioPersistence", name: str, *, bucket: str, data, size, type, metadata: Dict[str, str] = None) -> None:
         """
         upload file, with the given name to the selected bucket
         """
@@ -28,12 +27,11 @@ class MinioPersistence:
                 object_name=name,
                 data=data,
                 length=size,
-                content_type=type
+                content_type=type,
+                metadata=metadata or {}
             )
 
-
 minioClient: Union[None, MinioPersistence] = None
-
 
 def getMinioClient() -> MinioPersistence:
     global minioClient

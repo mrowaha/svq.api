@@ -1,6 +1,5 @@
-from typing import Protocol
+from typing import Protocol, Dict
 import io
-
 
 class IBlobPersistence(Protocol):
     def createBucket(name: str) -> None:
@@ -9,7 +8,7 @@ class IBlobPersistence(Protocol):
         """
         ...
 
-    def uploadFile(name: str, *, bucket: str, data: io.BytesIO, size: int, type: str) -> None:
+    def uploadFile(name: str, *, bucket: str, data: io.BytesIO, size: int, type: str, metadata: Dict[str, str] = None) -> None:
         """
         upload file, with the given name to the selected bucket
         """
