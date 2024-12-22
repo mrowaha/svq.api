@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from routes import registerDataSourceHandlers, register_echo
+from routes import registerDataSourceHandlers, register_echo, chat
 
 load_dotenv()
 
@@ -10,3 +10,4 @@ app = FastAPI(
 )
 registerDataSourceHandlers(app, prefix="/v1")
 register_echo(app, prefix="/v1")
+chat.register(app, prefix="/v1")
