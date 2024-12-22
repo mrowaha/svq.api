@@ -20,3 +20,11 @@ class IBlobPersistence(Protocol):
         :return: List of objects with their metadata
         """
         ...
+    def getObject(bucket: str, object_name: str) -> bytes:
+        """
+        Get an object from a bucket
+        :param bucket: Name of the bucket
+        :param object_name: Name of the object
+        :return: Object data as bytes
+        """
+        ...

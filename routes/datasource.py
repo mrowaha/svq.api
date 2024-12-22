@@ -8,6 +8,7 @@ from persistence.injectors import getBlobStorage, IBlobPersistence
 from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel
+from fastapi.responses import Response
 
 router = APIRouter(prefix="/datasource")
 
@@ -106,6 +107,25 @@ async def listDocuments(
         return ListDocumentsResponse(ok=True, documents=documents)
     except Exception as e:
         return ListDocumentsResponse(ok=False, documents=[], error=str(e))
+
+@router.get("/content/{name}")
+async def getDocumentContent(
+    name: str,
+    datasource: str,
+    blobPersistence: IBlobPersistence = Depends(getBlobStorage)
+) -> Response:
+    try:
+        bucket_name = f"docs-{datasource}"
+        data = blobPersistence.getObject(bucket_name, name)
+        return Response(
+            content=data,
+            media_type="application/pdf"
+        )
+    except Exception as e:
+        return {
+            "ok": False,
+            "error": str(e)
+        }
 
 def register(app: FastAPI, *, prefix=str) -> None:
     global router
