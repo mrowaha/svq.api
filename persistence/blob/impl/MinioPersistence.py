@@ -1,15 +1,15 @@
 """
 MinioPersistence implements IBlobPersistence
 """
-from typing import Union, Dict
+from typing import Union, Dict, List
 from minio import Minio
 import os
 
 class MinioPersistence:
     def __init__(self, *, endpoint: str, accesskey: str, secretkey: str):
-        print(endpoint)
-        print(accesskey)
-        print(secretkey)
+        # print(endpoint)
+        # print(accesskey)
+        # print(secretkey)
         self.client = Minio(endpoint, access_key=accesskey,
                             secret_key=secretkey, secure=False)
 
@@ -30,6 +30,20 @@ class MinioPersistence:
                 content_type=type,
                 metadata=metadata or {}
             )
+
+    def listObjects(self: "MinioPersistence", bucket: str) -> List[object]:
+        """
+        List all objects in a bucket
+        """
+        try:
+            if not self.client.bucket_exists(bucket):
+                return []
+                
+            objects = self.client.list_objects(bucket)
+            return list(objects)
+        except Exception as e:
+            print(f"Error listing objects in bucket {bucket}: {str(e)}")
+            return []
 
 minioClient: Union[None, MinioPersistence] = None
 

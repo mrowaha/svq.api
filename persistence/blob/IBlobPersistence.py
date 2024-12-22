@@ -1,4 +1,4 @@
-from typing import Protocol, Dict
+from typing import Protocol, Dict, List
 import io
 
 class IBlobPersistence(Protocol):
@@ -11,5 +11,12 @@ class IBlobPersistence(Protocol):
     def uploadFile(name: str, *, bucket: str, data: io.BytesIO, size: int, type: str, metadata: Dict[str, str] = None) -> None:
         """
         upload file, with the given name to the selected bucket
+        """
+        ...
+    def listObjects(bucket: str) -> List[object]:
+        """
+        List all objects in a bucket
+        :param bucket: Name of the bucket
+        :return: List of objects with their metadata
         """
         ...
