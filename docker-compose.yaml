@@ -22,9 +22,10 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: svq
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./postgres-init-scripts:/docker-entrypoint-initdb.d
 
   keycloak:
     image: quay.io/keycloak/keycloak:latest
@@ -32,12 +33,14 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=password
+      - KC_DB=postgres
+      - KC_DB_USERNAME=admin
+      - KC_DB_PASSWORD=password
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/svq
+      - KC_DB_SCHEMA=keycloak_schema
+      - KC_HOSTNAME=localhost
     command: >
-      start-dev --hostname localhost
-      --db=postgres
-      --db-url=jdbc:postgresql://postgres:5432/svq
-      --db-username=admin
-      --db-password=password
+      start-dev
     depends_on:
       - postgres
     ports:
