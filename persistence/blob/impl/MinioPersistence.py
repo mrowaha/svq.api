@@ -1,7 +1,7 @@
 """
 MinioPersistence implements IBlobPersistence
 """
-from typing import Union, Dict
+from typing import Union, Dict, List
 from minio import Minio
 import os
 from pydantic_settings import BaseSettings
@@ -43,10 +43,33 @@ class MinioPersistence:
                 metadata=metadata or {}
             )
 
+    def listObjects(self: "MinioPersistence", bucket: str) -> List[object]:
+        """
+        List all objects in a bucket
+        """
+        try:
+            if not self.client.bucket_exists(bucket):
+                return []
+                
+            objects = self.client.list_objects(bucket)
+            return list(objects)
+        except Exception as e:
+            print(f"Error listing objects in bucket {bucket}: {str(e)}")
+            return []
+    
+    def getObject(self, bucket: str, object_name: str) -> bytes:
+        """
+        Get an object from a bucket
+        """
+        try:
+            response = self.client.get_object(bucket, object_name)
+            return response.read()
+        except Exception as e:
+            print(f"Error getting object {object_name} from bucket {bucket}: {str(e)}")
+            raise e
 
 minioClient: Union[None, MinioPersistence] = None if os.getenv(
     "ENV") != "development" else MinioPersistence()
-
 
 def getMinioClient() -> MinioPersistence:
     global minioClient
