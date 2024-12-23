@@ -1,12 +1,10 @@
 """
 MinioPersistence implements IBlobPersistence
 """
-from typing import Union, Dict, List
+from typing import Union
 from minio import Minio
-import os
 from pydantic_settings import BaseSettings
 from pydantic import Field
-
 
 class MinioSettings(BaseSettings):
     minio_endpoint: str = Field(..., env="MINIO_ENDPOINT")
@@ -18,18 +16,33 @@ class MinioSettings(BaseSettings):
         env_file_encoding = "utf-8"
         extra = "allow"
 
-
 class MinioPersistence:
-    def __init__(self):
-        self.settings: MinioSettings = MinioSettings()
-        self.client = Minio(endpoint=self.settings.minio_endpoint, access_key=self.settings.minio_access_key,
-                            secret_key=self.settings.minio_secret_key, secure=False)
+    _instance = None
 
-    def createBucket(self: "MinioPersistence", name: str) -> None:
+    def __init__(self):
+        if MinioPersistence._instance is not None:
+            raise Exception("MinioPersistence is a singleton!")
+        
+        self.settings: MinioSettings = MinioSettings()
+        self.client = Minio(
+            endpoint=self.settings.minio_endpoint,
+            access_key=self.settings.minio_access_key,
+            secret_key=self.settings.minio_secret_key,
+            secure=False
+        )
+        MinioPersistence._instance = self
+
+    @staticmethod
+    def get_instance():
+        if MinioPersistence._instance is None:
+            MinioPersistence()
+        return MinioPersistence._instance
+
+    def createBucket(self, name: str) -> None:
         if not self.client.bucket_exists(name):
             self.client.make_bucket(name)
 
-    def uploadFile(self: "MinioPersistence", name: str, *, bucket: str, data, size, type, metadata: Dict[str, str] = None) -> None:
+    def uploadFile(self, name: str, *, bucket: str, data, size, type, metadata: dict[str, str] = None) -> None:
         """
         upload file, with the given name to the selected bucket
         """
@@ -43,7 +56,7 @@ class MinioPersistence:
                 metadata=metadata or {}
             )
 
-    def listObjects(self: "MinioPersistence", bucket: str) -> List[object]:
+    def listObjects(self, bucket: str) -> list[object]:
         """
         List all objects in a bucket
         """
@@ -68,9 +81,5 @@ class MinioPersistence:
             print(f"Error getting object {object_name} from bucket {bucket}: {str(e)}")
             raise e
 
-minioClient: Union[None, MinioPersistence] = None if os.getenv(
-    "ENV") != "development" else MinioPersistence()
-
 def getMinioClient() -> MinioPersistence:
-    global minioClient
-    return minioClient
+    return MinioPersistence.get_instance()
