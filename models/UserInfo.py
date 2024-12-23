@@ -3,6 +3,6 @@ from typing import Optional
 
 
 class UserInfo(BaseModel):
-    preferred_username: str
+    username: str
     email: Optional[str] = None
-    full_name: Optional[str] = None
+    fullname: Optional[str] = None

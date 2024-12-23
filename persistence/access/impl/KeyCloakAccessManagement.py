@@ -57,9 +57,9 @@ class KeyCloakAccessManagement:
                 raise InvalidTokenError()
 
             return UserInfo(
-                preferred_username=userInfo["preferred_username"],
+                username=userInfo["preferred_username"],
                 email=userInfo.get("email"),
-                full_name=userInfo.get("name"),
+                fullname=userInfo.get("name"),
             )
         except KeycloakAuthenticationError:
             raise AuthenticationError()
