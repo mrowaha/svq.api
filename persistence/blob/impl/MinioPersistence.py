@@ -6,6 +6,7 @@ from minio import Minio
 import os
 from pydantic_settings import BaseSettings
 from pydantic import Field
+from tempfile import NamedTemporaryFile
 
 
 class MinioSettings(BaseSettings):
@@ -50,13 +51,13 @@ class MinioPersistence:
         try:
             if not self.client.bucket_exists(bucket):
                 return []
-                
+
             objects = self.client.list_objects(bucket)
             return list(objects)
         except Exception as e:
             print(f"Error listing objects in bucket {bucket}: {str(e)}")
             return []
-    
+
     def getObject(self, bucket: str, object_name: str) -> bytes:
         """
         Get an object from a bucket
@@ -65,11 +66,25 @@ class MinioPersistence:
             response = self.client.get_object(bucket, object_name)
             return response.read()
         except Exception as e:
-            print(f"Error getting object {object_name} from bucket {bucket}: {str(e)}")
+            print(
+                f"Error getting object {object_name} from bucket {bucket}: {str(e)}")
             raise e
+
+    def load_pdf_temporarily(self, bucket_name, file_name):
+        pdf_data = self.getObject(bucket_name, file_name)
+        print(pdf_data)
+        temp_file = NamedTemporaryFile(delete=False, suffix=".pdf")
+        temp_file_path = temp_file.name
+        with open(temp_file_path, "wb") as f:
+            f.write(pdf_data)
+        print(
+            f"PDF successfully loaded and saved temporarily at {temp_file_path}")
+        return temp_file_path
+
 
 minioClient: Union[None, MinioPersistence] = None if os.getenv(
     "ENV") != "development" else MinioPersistence()
+
 
 def getMinioClient() -> MinioPersistence:
     global minioClient

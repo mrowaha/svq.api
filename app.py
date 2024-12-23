@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 from fastapi import FastAPI
-from routes import registerDataSourceHandlers, registerEcho, registerAuth, chat
+from routes import registerDataSourceHandlers, registerEcho, registerAuth, registerAnnotate, chat
 
 load_dotenv()
 app = FastAPI(
@@ -10,5 +10,6 @@ app = FastAPI(
 
 registerAuth(app, prefix="/v1")
 registerDataSourceHandlers(app, prefix="/v1")
+registerAnnotate(app, prefix="/v1")
 chat.register(app, prefix="/v1")
 registerEcho(app, prefix="/v1")

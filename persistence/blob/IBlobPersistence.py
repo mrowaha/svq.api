@@ -1,6 +1,7 @@
 from typing import Protocol, Dict, List
 import io
 
+
 class IBlobPersistence(Protocol):
     def createBucket(name: str) -> None:
         """
@@ -13,6 +14,7 @@ class IBlobPersistence(Protocol):
         upload file, with the given name to the selected bucket
         """
         ...
+
     def listObjects(bucket: str) -> List[object]:
         """
         List all objects in a bucket
@@ -20,6 +22,7 @@ class IBlobPersistence(Protocol):
         :return: List of objects with their metadata
         """
         ...
+
     def getObject(bucket: str, object_name: str) -> bytes:
         """
         Get an object from a bucket
@@ -27,4 +30,7 @@ class IBlobPersistence(Protocol):
         :param object_name: Name of the object
         :return: Object data as bytes
         """
+        ...
+
+    def load_pdf_temporarily(bucket_name, file_name) -> str:
         ...
