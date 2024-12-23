@@ -4,14 +4,26 @@ MinioPersistence implements IBlobPersistence
 from typing import Union, Dict
 from minio import Minio
 import os
+from pydantic_settings import BaseSettings
+from pydantic import Field
+
+
+class MinioSettings(BaseSettings):
+    minio_endpoint: str = Field(..., env="MINIO_ENDPOINT")
+    minio_access_key: str = Field(..., env="MINIO_ACCESS_KEY")
+    minio_secret_key: str = Field(..., env="MINIO_SECRET_KEY")
+
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+        extra = "allow"
+
 
 class MinioPersistence:
-    def __init__(self, *, endpoint: str, accesskey: str, secretkey: str):
-        print(endpoint)
-        print(accesskey)
-        print(secretkey)
-        self.client = Minio(endpoint, access_key=accesskey,
-                            secret_key=secretkey, secure=False)
+    def __init__(self):
+        self.settings: MinioSettings = MinioSettings()
+        self.client = Minio(endpoint=self.settings.minio_endpoint, access_key=self.settings.minio_access_key,
+                            secret_key=self.settings.minio_secret_key, secure=False)
 
     def createBucket(self: "MinioPersistence", name: str) -> None:
         if not self.client.bucket_exists(name):
@@ -31,21 +43,11 @@ class MinioPersistence:
                 metadata=metadata or {}
             )
 
-minioClient: Union[None, MinioPersistence] = None
+
+minioClient: Union[None, MinioPersistence] = None if os.getenv(
+    "ENV") != "development" else MinioPersistence()
+
 
 def getMinioClient() -> MinioPersistence:
     global minioClient
-    if os.getenv("ENV") == "development":
-        if minioClient is None:
-            endpoint = "localhost:9000" if os.getenv(
-                "MINIO_ENDPOINT") is None else os.getenv("MINIO_ENDPOINT")
-            accessKey = "admin" if os.getenv(
-                "MINIO_ACCESS_KEY") is None else os.getenv("MINIO_ACCESS_KEY")
-            secretKey = "password" if os.getenv(
-                "MINIO_SECRET_KEY") is None else os.getenv("MINIO_SECRET_KEY")
-            minioClient = MinioPersistence(
-                endpoint=endpoint,
-                accesskey=accessKey,
-                secretkey=secretKey
-            )
     return minioClient

@@ -9,6 +9,7 @@ from typing import Optional
 
 router = APIRouter(prefix="/datasource")
 
+
 @router.post("/upload")
 async def uploadFile(
     datasource: str = Form(...),
@@ -18,13 +19,14 @@ async def uploadFile(
     blobPersistence: IBlobPersistence = Depends(getBlobStorage)
 ):
     # Validate file type
-    allowed_types = ["application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"]
+    allowed_types = ["application/pdf",
+                     "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain"]
     if file.content_type not in allowed_types:
         return {
             "ok": False,
             "error": "Unsupported file type. Only PDF, DOCX, and TXT files are allowed."
         }
-    
+
     try:
         # Create a unique bucket name based on datasource type
         bucket_name = f"docs-{datasource}"
@@ -67,6 +69,7 @@ async def uploadFile(
             "error": str(e)
         }
 
-def register(app: FastAPI, *, prefix=str) -> None:
+
+def register(app: FastAPI, *, prefix: str) -> None:
     global router
     app.include_router(router, prefix=prefix)
